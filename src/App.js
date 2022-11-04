@@ -5,7 +5,7 @@ import boundingIcon from './icon/Bounding_Box_Create.svg'
 
 
 function App() {
-  let image = document.createElement('img')
+
   //placeholder 연결
   useEffect(() => {
     const requestOptions = {
@@ -16,9 +16,11 @@ function App() {
     fetch("https://jsonplaceholder.typicode.com/photos", requestOptions)
       .then(response => response.json())
       .then(result => {
-        image.src = result[Math.floor(Math.random() * result.length)].url;
-        image.style.position = 'relative'; image.draggable = false;
-        document.querySelector('.imgBox').appendChild(image);
+        let src = result[Math.floor(Math.random() * result.length)].url;
+        document.querySelector('.imgBox').style.width = 97.083+'vw'
+        document.querySelector('.imgBox').style.height = 94.074+'vh'
+        document.querySelector('.imgBox').style.backgroundImage = `url(${src})`;
+        document.querySelector('.imgBox').style.backgroundSize = 'contain'
       })
       .catch(error => console.log('error'.error))
   }, [])
@@ -48,14 +50,14 @@ function App() {
   //초기 좌표
   //초기 좌표에서 마우스 클릭된 좌표와의 차이로 생성됨
   const makeLabel = e => {
-
+      
     if (e.pageX - originalX != 0 && e.pageY - originalY != 0) {
       const boundingBox = document.createElement('div');
       boundingBox.className = 'boundingBox';
       boundingBox.style.backgroundColor = 'rgb(86, 104, 217, .2)';
       boundingBox.style.position = 'absolute';
       boundingBox.style.width = e.pageX - originalX + 'px'; boundingBox.style.height = e.pageY - originalY + 'px';
-      boundingBox.style.top = originalY + 'px'; boundingBox.style.left = originalX + 'px';
+      boundingBox.style.top = (parseInt(originalY)*100)/document.body.clientHeight + 'vh'; boundingBox.style.left = (parseInt(originalX)*100)/document.body.clientWidth + 'vw';
       boundingBox.style.zIndex = '1'
       document.querySelector('.imgBox').appendChild(boundingBox)
     }
@@ -78,8 +80,9 @@ function App() {
       //앵커생성
       for (let i = 0; i < 3; i++) {
         const anchor = document.createElement('div')
-        anchor.style.position = 'absolute'; anchor.style.top = ' -12px'
-        anchor.style.left = ' -12px'
+        anchor.style.position = 'absolute'; anchor.style.top = ' -12px';
+        anchor.className = 'anchor';
+        anchor.style.left = ' -12px';
         anchor.style.width = '16px'; anchor.style.height = '16px';
         anchor.style.padding = '0'
         if (i == 1) {
@@ -95,6 +98,7 @@ function App() {
         const anchor = document.createElement('div')
         anchor.style.position = 'absolute'; anchor.style.top = (parseInt(e.target.style.height) - 21.96) / 2 + 'px';
         anchor.style.left = ' -12px';
+        anchor.className = 'anchor';
         anchor.style.width = '16px'; anchor.style.height = '16px';
         anchor.style.padding = '0'
         if (i == 0) {
@@ -107,7 +111,8 @@ function App() {
       for (let i = 0; i < 3; i++) {
         const anchor = document.createElement('div')
         anchor.style.position = 'absolute'; anchor.style.top = anchor.style.top = (parseInt(e.target.style.height) - 12) + 'px';
-        anchor.style.left = ' -12px'
+        anchor.style.left = ' -12px';
+        anchor.className = 'anchor';
         anchor.style.width = '16px'; anchor.style.height = '16px';
         anchor.style.padding = '0'
         if (i == 1) {
@@ -120,6 +125,9 @@ function App() {
         e.target.appendChild(anchor)
       }
       //앵커생성
+      document.addEventListener('click',e=>{
+        console.log(e.target.clientX,e.target.clientY);
+      })
     }
 
     //delete키 눌렀을 때 라벨링 박스 삭제

@@ -23,17 +23,17 @@ body {
 }
 .menu {
   width: 56px;
-  height : auto;
+  height : 93.889vh;
   background-color: #fcfcfc;
   border: 1px solid #EBEDF2;
 }
 .body{
-  height : 63.375rem;
+  height : auto;
   display: flex;
 }
 .imgBox{
   display: flex;
-  margin : auto;
+  margin : 0;
 }
 .select{
   margin: 8px;
@@ -52,4 +52,7 @@ body {
   cursor: pointer;
   background-color: #D5D9E2;
   border-radius: 5px;
+}
+.anchor:hover{
+  cursor: pointer;
 }
