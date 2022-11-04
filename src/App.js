@@ -3,11 +3,12 @@ import './App.css';
 import selectIcon from './icon/Toolbar_select.svg'
 import boundingIcon from './icon/Bounding_Box_Create.svg'
 
-
 function App() {
-
   //placeholder 연결
   useEffect(() => {
+
+    const imgBox = document.querySelector('.imgBox');
+
     const requestOptions = {
       method: 'GET',
       redirect: 'follow'
@@ -17,31 +18,77 @@ function App() {
       .then(response => response.json())
       .then(result => {
         let src = result[Math.floor(Math.random() * result.length)].url;
-        document.querySelector('.imgBox').style.width = 97.083+'vw'
-        document.querySelector('.imgBox').style.height = 94.074+'vh'
-        document.querySelector('.imgBox').style.backgroundImage = `url(${src})`;
-        document.querySelector('.imgBox').style.backgroundSize = 'contain'
+        imgBox.style.backgroundImage = `url(${src})`;
+        imgBox.style.backgroundSize = 'contain'
       })
       .catch(error => console.log('error'.error))
   }, [])
   //placeholder 연결
   const selectLabelEvent = e => {
-    changeColor(e);
-    document.querySelector('.imgBox').addEventListener('click', selectFunc)
-    document.querySelector('.imgBox').removeEventListener('mousedown', originGrid)
-    document.querySelector('.imgBox').removeEventListener('mouseup', makeLabel)
-
+    change(e);
   }
-
 
   //라벨 생성
   let originalX, originalY;
   const makeLabelEvent = e => {
-    changeColor(e);
-    document.querySelector('.imgBox').removeEventListener('click', selectFunc)
-    document.querySelector('.imgBox').addEventListener('mousedown', originGrid)
-    document.querySelector('.imgBox').addEventListener('mouseup', makeLabel)
+    console.log('눌림')
+    change(e);
   }
+
+  //메뉴 선택시 이벤트 추가 및 배경색 변경
+  function change(e) {
+    const imgBox = document.querySelector('.imgBox');
+    //클래스를 확인하여 있으면 이벤트 제거 아니면 추가
+    if(e.currentTarget === document.querySelector('.select')){
+      if (imgBox.classList.contains('bound')) {
+        imgBox.removeEventListener('mousedown', originGrid)
+        imgBox.removeEventListener('mouseup', makeLabel)
+        imgBox.classList.remove('bound')
+        imgBox.classList.add('sel');
+        imgBox.addEventListener('click', selectFunc)
+      } else if(imgBox.classList.contains('sel')){
+        imgBox.removeEventListener('click', selectFunc)
+        imgBox.classList.remove('sel')
+      }
+        else {
+        imgBox.classList.add('sel');
+         // 이벤트 핸들러 등록
+        imgBox.addEventListener('click', selectFunc)
+      }
+ 
+    } else {
+      if (imgBox.classList.contains('bound') && imgBox.classList.contains('sel') ) {
+        imgBox.removeEventListener('click', selectFunc)
+        imgBox.classList.remove('sel')
+      } else if(imgBox.classList.contains('bound')){
+        imgBox.removeEventListener('mousedown', originGrid)
+        imgBox.removeEventListener('mouseup', makeLabel)
+        imgBox.classList.remove('bound')
+      } else {
+        imgBox.classList.add('bound');
+         // 이벤트 핸들러 등록
+         imgBox.addEventListener('mousedown', originGrid)
+         imgBox.addEventListener('mouseup', makeLabel)
+      }
+    }
+    //메뉴 배경색 변경
+    if (e.currentTarget.style.backgroundColor) {
+      e.currentTarget.style.backgroundColor = null;
+      e.currentTarget.style.borderRadius = null;
+    } else {
+      if (e.currentTarget === document.querySelector('.select')) {
+        e.currentTarget.nextSibling.style.backgroundColor = null;
+        e.currentTarget.nextSibling.style.borderRadius = null;
+      } else if (e.currentTarget === document.querySelector('.bounding')) {
+        e.currentTarget.previousSibling.style.backgroundColor = null;
+        e.currentTarget.previousSibling.style.borderRadius = null;
+      }
+      e.currentTarget.style.backgroundColor = '#D5D9E2';
+      e.currentTarget.style.borderRadius = '5px';
+    }
+  }
+  //메뉴 선택시 배경색 바뀌게 하는 코드
+
   //초기 좌표
   const originGrid = e => {
     originalX = e.clientX
@@ -50,16 +97,16 @@ function App() {
   //초기 좌표
   //초기 좌표에서 마우스 클릭된 좌표와의 차이로 생성됨
   const makeLabel = e => {
-      
+    const imgBox = document.querySelector('.imgBox');
     if (e.pageX - originalX != 0 && e.pageY - originalY != 0) {
       const boundingBox = document.createElement('div');
       boundingBox.className = 'boundingBox';
       boundingBox.style.backgroundColor = 'rgb(86, 104, 217, .2)';
       boundingBox.style.position = 'absolute';
       boundingBox.style.width = e.pageX - originalX + 'px'; boundingBox.style.height = e.pageY - originalY + 'px';
-      boundingBox.style.top = (parseInt(originalY)*100)/document.body.clientHeight + 'vh'; boundingBox.style.left = (parseInt(originalX)*100)/document.body.clientWidth + 'vw';
+      boundingBox.style.marginTop = ((parseInt(originalY)-64)*100)/document.body.clientHeight + 'vh'; boundingBox.style.marginLeft = ((parseInt(originalX)-56)*100)/document.body.clientWidth + 'vw';
       boundingBox.style.zIndex = '1'
-      document.querySelector('.imgBox').appendChild(boundingBox)
+      imgBox.appendChild(boundingBox)
     }
 
 
@@ -70,6 +117,7 @@ function App() {
   //라벨 선택기능
   let originalTop, originalLeft, diffTop, diffWidth, height, width
   const selectFunc = e => {
+    const imgBox = document.querySelector('.imgBox');
     if (e.target.className == 'boundingBox') {
 
       console.log((parseInt(e.target.style.width) - 48) / 3)
@@ -125,9 +173,6 @@ function App() {
         e.target.appendChild(anchor)
       }
       //앵커생성
-      document.addEventListener('click',e=>{
-        console.log(e.target.clientX,e.target.clientY);
-      })
     }
 
     //delete키 눌렀을 때 라벨링 박스 삭제
@@ -139,60 +184,43 @@ function App() {
       }
     })
     //delete키 눌렀을 때 라벨링 박스 삭제
+    //라벨 이동 기능
     e.target.addEventListener('dragstart', e => {
-      originalTop = parseInt(e.target.style.top)
-      originalLeft = parseInt(e.target.style.left)
-
-
-      console.log(originalTop)
+      originalTop = parseInt(e.target.style.marginTop)
+      originalLeft = parseInt(e.target.style.marginLeft)
     })
     e.target.addEventListener('dragend', e => {
 
-      console.log(e.clientY)
-
       if (originalTop < e.clientY) {
         diffTop = e.clientY - originalTop;
-        diffWidth = e.clientX - originalLeft
-        width = originalLeft + diffWidth;
-        height = originalTop + diffTop;
-        console.log(diffTop)
+        diffWidth = e.clientX - originalLeft;
+        width = (originalLeft + diffWidth) - 56;
+        height = (originalTop + diffTop) - 64;
+        console.log(originalLeft + diffWidth)
       } else {
         diffTop = originalTop - e.clientY;
         diffWidth = originalLeft - e.clientX;
-        width = originalLeft - diffWidth;
-        height = originalTop - diffTop;
+        width = (originalLeft - diffWidth) - 56;
+        height = (originalTop - diffTop)- 64;
         console.log(diffTop)
       }
-
-      console.log(height)
-
-      e.target.style.top = height + 'px';
-      e.target.style.left = width + 'px';
+      if((height*100)/document.body.clientHeight < 0){
+        e.target.style.marginTop =  0 + 'vh';
+      } else if ((height*100)/document.body.clientHeight <= 94.074) {
+        e.target.style.marginTop = (height*100)/document.body.clientHeight + 'vh';
+      }
+      if((width*100)/document.body.clientWidth < 0 ){
+        e.target.style.marginLeft = 0 + 'vw'
+      } else {
+        e.target.style.marginLeft = (width*100)/document.body.clientWidth + 'vw';
+      }
+     
     })
-
+    //라벨 이동 기능
 
   }
   //라벨 선택기능
 
-  //메뉴 선택시 배경색 바뀌게 하는 코드
-  function changeColor(e) {
-    if (e.currentTarget.style.backgroundColor) {
-      e.currentTarget.style.backgroundColor = null;
-      e.currentTarget.style.borderRadius = null;
-    } else {
-      if (e.currentTarget === document.querySelector('.select')) {
-
-        e.currentTarget.nextSibling.style.backgroundColor = null;
-        e.currentTarget.nextSibling.style.borderRadius = null;
-      } else if (e.currentTarget === document.querySelector('.bounding')) {
-        e.currentTarget.previousSibling.style.backgroundColor = null;
-        e.currentTarget.previousSibling.style.borderRadius = null;
-      }
-      e.currentTarget.style.backgroundColor = '#D5D9E2';
-      e.currentTarget.style.borderRadius = '5px';
-    }
-  }
-  //메뉴 선택시 배경색 바뀌게 하는 코드
 
   return (
     <div className="App">

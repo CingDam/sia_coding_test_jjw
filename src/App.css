@@ -34,6 +34,7 @@ body {
 .imgBox{
   display: flex;
   margin : 0;
+  width : 97.083vw; height: 94.074vh;
 }
 .select{
   margin: 8px;
